@@ -1,9 +1,30 @@
 use warp::Filter;
 
+mod input;
+mod parser;
+
 #[tokio::main]
 async fn main() {
     // Serve static files from the "static" directory
     let static_files = warp::fs::dir("static");
+
+    let file_path = match input::get_file_path(){
+        Ok(path) => path,
+        Err(_) => {
+            return;
+        }
+    };
+
+    if let Err(_) = input::verify_file_exists(&file_path){
+        return;
+    }
+
+    let data = match input::read_input(&file_path){
+        Ok(data) => data,
+        Err(_) => {
+            return;
+        }
+    };
 
     // Create a warp filter to handle the data endpoint
     let data = warp::path("data")
