@@ -19,8 +19,8 @@ async fn main() {
         return;
     }
 
-    let data = match input::read_input(&file_path){
-        Ok(data) => data,
+    let json_data = match input::read_input(&file_path){
+        Ok(json_data) => json_data,
         Err(_) => {
             return;
         }
@@ -28,9 +28,9 @@ async fn main() {
 
     // Create a warp filter to handle the data endpoint
     let data = warp::path("data")
-        .map(|| {
+        .map(move || {
+            let data = parser::terraform::parse_terraform(&json_data);
             // Generate data for D3.js here (e.g., parse Terraform plan and convert to JSON)
-            let data = r#"{"nodes": [], "links": []}"#; // Example data
             warp::reply::json(&data)
         });
 
