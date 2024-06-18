@@ -5,6 +5,53 @@
     <title>Terraform Graph Visualization</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        #visualization {
+            width: 100%;
+            height: 600px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .output {
+            width: 80%;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .output h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .output ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .output li {
+            background-color: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
         .node circle {
             stroke: #fff;
             stroke-width: 1.5px;
@@ -13,9 +60,6 @@
             stroke: #999;
             stroke-opacity: 0.6;
         }
-        .output {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -23,6 +67,7 @@
     <div id="visualization"></div>
     <div class="output">
         <h2>Outputs</h2>
+        <ul></ul>
     </div>
     <script src="script.js"></script>
 </body>
