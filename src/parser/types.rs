@@ -3,6 +3,38 @@ use std::collections::HashMap;
 use serde_json::Value;
 use serde::{Deserialize, Serialize};
 
+fn parse_terraform_value(value: &Value) -> String {
+    match value {
+        Value::String(s) => s.clone(),
+        Value::Number(n) => n.to_string(),
+        Value::Bool(b) => b.to_string(),
+        Value::Array(a) => {
+            let mut array_str = String::from("[");
+            for (i, v) in a.iter().enumerate() {
+                array_str.push_str(&parse_terraform_value(v));
+                if i < a.len() - 1 {
+                    array_str.push_str(", ");
+                }
+            }
+            array_str.push_str("]");
+            array_str
+        },
+        Value::Object(o) => {
+            let mut object_str = String::from("{");
+            for (i, (k, v)) in o.iter().enumerate() {
+                object_str.push_str(&format!("\"{}\": {}", k, parse_terraform_value(v)));
+                if i < o.len() - 1 {
+                    object_str.push_str(", ");
+                }
+            }
+            object_str.push_str("}");
+            object_str
+        },
+        Value::Null => "null".to_string(),
+    }
+}
+
+
 #[derive(Serialize, Deserialize)]
 pub struct Graph {
     pub nodes: Vec<Node>,
@@ -21,19 +53,20 @@ pub struct Node {
 }
 impl Node {
     pub fn new(resource: &Value) -> Result<Node, Box<dyn std::error::Error>> {
-        let address = resource.get("address").ok_or("Missing `address` field in `resources` section")?
+        let address = resource.get("address").ok_or("Missing `address` field")?
             .as_str().ok_or("`address` field is not a string")?.to_string();
-        let node_type = resource.get("type").ok_or("Missing `type` field in `resources` section")?
+        let node_type = resource.get("type").ok_or("Missing `type` field")?
             .as_str().ok_or("`type` field is not a string")?.to_string();
-        let name = resource.get("name").ok_or("Missing `name` field in `resources` section")?
+        let name = resource.get("name").ok_or("Missing `name` field")?
             .as_str().ok_or("`name` field is not a string")?.to_string();
-        let provider = resource.get("provider_name").ok_or("Missing `provider_name` field in `resources` section")?
+        let provider = resource.get("provider_name").ok_or("Missing `provider_name` field")?
             .as_str().ok_or("`provider_name` field is not a string")?.to_string();
 
         let mut values_hm: HashMap<String, String> = HashMap::new();
-        let values_json: &Value = resource.get("values").ok_or("Missing `values` field in `resources` section")?;
+        let values_json: &Value = resource.get("values").ok_or("Missing `values` field")?;
         for (key, value) in values_json.as_object().ok_or("`values` field is not a valid JSON object")? {
-            let value = value.as_str().ok_or("`value` field is not a string")?.to_string();
+            let value = parse_terraform_value(value);
+    
             values_hm.insert(key.clone(), value);
         }
 
@@ -75,7 +108,7 @@ impl Output {
             "<sensitive>".to_string()
         } else {
             output.get("value").ok_or("Missing `value` field")?
-                .as_str().ok_or("`value` field is not a string")?.to_string()
+                .as_str().ok_or("`value` field in `output` is not a string")?.to_string()
         };
 
         Ok(Output {
