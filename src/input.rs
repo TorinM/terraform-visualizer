@@ -4,6 +4,7 @@
 use std::env;
 use std::path::Path;
 use serde_json;
+use serde_json::Value;
 
 /// Verifies the user input file is a valid JSON file.
 /// Wraps the serde_json::from_str function.
@@ -40,12 +41,12 @@ pub fn verify_file_exists(file_path: &str) -> Result<(), String> {
 
 /// Reads the user input file with std::fs::read_to_string.
 /// Verifies the file is a valid JSON file with verify_input_file_json.
-/// Returns the file contents as a String.
-pub fn read_input(file_path: &String) -> Result<String, Box<dyn std::error::Error>> {
+/// Returns the file contents as a serde_json::Value.
+pub fn read_input(file_path: &String) -> Result<Value, Box<dyn std::error::Error>> {
     match std::fs::read_to_string(file_path) {
         Ok(data) => {
             match verify_input_file_json(&data) {
-                Ok(_) => Ok(data),
+                Ok(json_data) => Ok(json_data),
                 Err(e) => {
                     eprintln!("Error reading input file. Verify input file is from `terraform show -json example.json`");
                     Err(Box::new(e))
