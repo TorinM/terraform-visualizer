@@ -18,7 +18,7 @@ Then run the tool:
 
 This will launch a web server on `http://127.0.0.1:3030` with the visual map.
 
-## Supported Resources
+## Supported Types
 
 - `resource`
   - `depends_on`
