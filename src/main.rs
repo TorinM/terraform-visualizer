@@ -19,19 +19,26 @@ async fn main() {
         return;
     }
 
-    let json_data = match input::read_input(&file_path){
+    let json_data_raw = match input::read_input(&file_path){
         Ok(json_data) => json_data,
         Err(_) => {
             return;
         }
     };
+    let json_data = match parser::terraform::parse_terraform(&json_data_raw)
+    {
+        Ok(json_data) => json_data,
+        Err(e) => {
+            eprintln!("Fatal error parsing Terraform data. Message: {}", e);
+            return;
+        }
+    };
 
+    let json_data_clone = json_data.clone();
     // Create a warp filter to handle the data endpoint
     let data = warp::path("data")
         .map(move || {
-            let data = parser::terraform::parse_terraform(&json_data);
-            // Generate data for D3.js here (e.g., parse Terraform plan and convert to JSON)
-            warp::reply::json(&data)
+            warp::reply::json(&json_data_clone)
         });
 
     // Combine filters
@@ -39,5 +46,5 @@ async fn main() {
 
     // Start the server
     println!("Server started at http://127.0.0.1:3030");
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await
 }
