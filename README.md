@@ -26,9 +26,9 @@ This will launch a web server on `http://127.0.0.1:3030` with the visual map.
 
 ## Dependencies
 
-- [serde_json](https://crates.io/crates/serde_json)
-- [tokio](https://crates.io/crates/tokio)
-- [warp](https://crates.io/crates/warp)
+- [serde_json](https://crates.io/crates/serde_json) - JSON parsing
+- [tokio](https://crates.io/crates/tokio) - Async runtime
+- [warp](https://crates.io/crates/warp) - Web server
 
 ## Contributing
 
