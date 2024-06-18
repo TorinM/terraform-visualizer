@@ -6,16 +6,22 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
 }
 
 h1 {
     color: #333;
     margin-top: 20px;
+    text-align: center;
 }
 
 #visualization {
-    width: 100%;
-    height: 600px;
+    width: 90%;
+    height: 60vh;
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -26,13 +32,14 @@ h1 {
 }
 
 .output {
-    width: 80%;
+    width: 90%;
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
     box-sizing: border-box;
+    margin-bottom: 20px;
 }
 
 .output h2 {
