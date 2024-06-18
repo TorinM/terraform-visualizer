@@ -26,10 +26,10 @@ fn get_nodes(resources: &Vec<Value>) -> Result<Vec<types::Node>, Box<dyn Error>>
 fn get_links(resources: &Vec<Value>) -> Result<Vec<types::Link>, Box<dyn Error>> {
     let mut links: Vec<types::Link> = Vec::new();
     for resource in resources {
-        let source_addr = resource.get("address").ok_or("Missing address field")?.to_string();
+        let source_addr = resource.get("address").ok_or("Missing `address` field")?.to_string();
 
         let depends_on = match resource.get("depends_on") {
-            Some(depends_on) => depends_on.as_array().ok_or("depends_on field is not an array")?,
+            Some(depends_on) => depends_on.as_array().ok_or("`depends_on` field is not an array")?,
             None => { continue; }
         };
         for depend in depends_on {
@@ -53,14 +53,14 @@ fn convert_graph_to_json_string(nodes: Vec<types::Node>, links: Vec<types::Link>
 
 
 pub fn parse_terraform(json_data: &Value) -> Result<String, Box<dyn Error>> {
-    let values = json_data.get("values").ok_or("Missing values field")?;
+    let values = json_data.get("values").ok_or("Missing top level `values` field")?;
 
-    let outputs = values.get("outputs").ok_or("Missing outputs field")?
-                .as_object().ok_or("outputs field is not a valid JSON object")?;
+    let outputs = values.get("outputs").ok_or("Missing `outputs` field")?
+                .as_object().ok_or("`outputs` field is not a valid JSON object")?;
 
-    let resources = values.get("root_module").ok_or("Missing root_module field")?
-                .get("resources").ok_or("Missing resources field")?
-                .as_array().ok_or("resources field is not an array")?;
+    let resources = values.get("root_module").ok_or("Missing `root_module` field")?
+                .get("resources").ok_or("Missing `resources` field")?
+                .as_array().ok_or("`resources` field is not an array")?;
 
     let nodes: Vec<types::Node> = get_nodes(resources)?;
     let links: Vec<types::Link> = get_links(resources)?;
