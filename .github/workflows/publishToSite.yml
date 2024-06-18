@@ -1,0 +1,33 @@
+name: Publish to Site
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+  
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Build
+      run: cargo build --release --verbose
+
+    # https://github.com/marketplace/actions/upload-s3
+    - uses: shallwefootball/s3-upload-action@master
+      with:
+        aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+        aws_bucket: ${{ secrets.AWS_S3_BUCKET }}
+        source_dir: 'target/release/terraform-visualizer/terraform-visualizer'
+        destination_dir: 'executables/terraform-visualizer/terraform-visualizer'
