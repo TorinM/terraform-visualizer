@@ -1,64 +1,77 @@
-// let data = r#"{"nodes": [], "links": []}"#; // Example data
+use serde_json::Value;
+use std::error::Error;
 
 use super::types;
 
-fn parse_outputs(outputs: &serde_json::Value) -> Vec<types::Output> {
+fn get_outputs(outputs: &serde_json::Value) -> Result<Vec<types::Output>, Box<dyn Error>> {
     let mut output_vec: Vec<types::Output> = Vec::new();
-    for (key, value) in outputs.as_object().unwrap() {
+    for (key, value) in outputs.as_object().ok_or("outputs field is not a valid JSON object")? {
         let output = types::Output {
             name: key.clone(),
-            value: value.get("value").unwrap().to_string(),
-            sensitive: value.get("sensitive").unwrap().as_bool().unwrap(),
+            value: value.get("value").ok_or("Missing value field")?.to_string(),
+            sensitive: value.get("sensitive").ok_or("Missing sensitive field")?.as_bool().ok_or("resources field is not a boolean")?,
         };
         output_vec.push(output);
     }
-    output_vec
+    Ok(output_vec)
 }
 
-pub fn get_nodes(json: &serde_json::Value) -> Vec<types::Node> {
+
+fn get_nodes(json: &serde_json::Value) -> Result<Vec<types::Node>, Box<dyn Error>> {
     let mut nodes: Vec<types::Node> = Vec::new();
-    let resources = json.get("resources").unwrap().as_array().unwrap();
+    let resources = json.get("resources").ok_or("Missing resources field")?.as_array().ok_or("resources field is not an array")?;
     for resource in resources {
-        let node = types::Node {
-            address: resource.get("address").unwrap().to_string(),
-        };
+        let node = types::Node::new(resource);
         nodes.push(node);
     }
-    nodes
+    Ok(nodes)
 }
 
-pub fn get_links(json: &serde_json::Value) -> Vec<types::Link> {
+
+fn get_links(json: &serde_json::Value) -> Result<Vec<types::Link>, Box<dyn Error>> {
     let mut links: Vec<types::Link> = Vec::new();
-    let resources = json.get("resources").unwrap().as_array().unwrap();
+    let resources = json.get("resources").ok_or("Missing resources field")?.as_array().ok_or("resources field is not an array")?;
+
     for resource in resources {
-        let source = types::Node {
-            address: resource.get("address").unwrap().to_string(),
+        let source_addr = resource.get("address").ok_or("Missing address field")?.to_string();
+
+        let depends_on = match resource.get("depends_on") {
+            Some(depends_on) => depends_on.as_array().ok_or("depends_on field is not an array")?,
+            None => { continue; }
         };
-        let target = types::Node {
-            address: resource.get("address").unwrap().to_string(),
-        };
-        let link = types::Link {
-            source: source,
-            target: target,
-        };
-        links.push(link);
+        for depend in depends_on {
+            let target_addr = depend.to_string();
+            let link: types::Link = types::Link::new(source_addr.clone(), target_addr);
+            links.push(link);
+        }
     }
-    links
+    Ok(links)
 }
 
 
-pub fn parse_terraform(json_data: &str) -> serde_json::Value {
-    let json: serde_json::Value = serde_json::from_str(json_data).unwrap();
+fn convert_graph_to_json_string(nodes: Vec<types::Node>, links: Vec<types::Link>, outputs: Vec<types::Output>) -> Result<String, serde_json::Error> {
+    let graph = types::Graph {
+        nodes,
+        links,
+        outputs,
+    };
+    serde_json::to_string(&graph)
+}
 
-    let values = json.get("values").unwrap();
 
-    let mut nodes: Vec<types::Node> = Vec::new();
-    let mut links: Vec<types::Link> = Vec::new();
-    let mut outputs: Vec<types::Output> = Vec::new();
+pub fn parse_terraform(json_data: &Value) -> Result<String, Box<dyn Error>> {
+    let values = json_data.get("values").ok_or("Missing values field")?;
+    let outputs = values.get("outputs").ok_or("Missing outputs field")?;
+    let resources = values.get("root_module").ok_or("Missing root_module field")?.get("resources").ok_or("Missing resources field")?;
 
-    if let Some(output_key) = values.get("outputs") {
-        outputs = parse_outputs(output_key);
+    let nodes: Vec<types::Node> = get_nodes(resources)?;
+    let links: Vec<types::Link> = get_links(resources)?;
+    let outputs: Vec<types::Output> = get_outputs(outputs)?;
+
+    match convert_graph_to_json_string(nodes, links, outputs) {
+        Ok(json_string) => Ok(json_string),
+        Err(e) => {
+            Err(Box::new(e))
+        }
     }
-
-    json
 }
