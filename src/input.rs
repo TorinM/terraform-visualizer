@@ -24,20 +24,16 @@ pub fn get_file_path() -> Result<String, String> {
         let msg: String = format!("Usage: {} <PATH TO terraform.json FILE>", args[0]);
         return Err(msg);
     }
-    Ok(args[1].clone())
-}
 
+    let file_path = &args[1];
 
-/// Verifies the user input file exists.
-/// Wraps the std::path::Path::exists function.
-pub fn verify_file_exists(file_path: &str) -> Result<(), String> {
     if !Path::new(file_path).exists() {
         let msg = format!("File '{}' not found.", file_path);
         return Err(msg);
     }
-    Ok(())
-}
 
+    Ok(file_path.to_string())
+}
 
 /// Reads the user input file with std::fs::read_to_string.
 /// Verifies the file is a valid JSON file with verify_input_file_json.
