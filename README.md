@@ -16,7 +16,13 @@ Then run the tool:
 ./terraform-visualizer tf.json
 ```
 
-This will launch a web server on `http://localhost:3030` with the visual map.
+This will launch a web server on `http://127.0.0.1:3030` with the visual map.
+
+## Supported Resources
+
+- `resource`
+  - `depends_on`
+- `output`
 
 ## Dependencies
 
