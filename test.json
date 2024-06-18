@@ -9,7 +9,7 @@
         "type": "string"
       },
       "test2": {
-        "sensitive": false,
+        "sensitive": true,
         "value": "factually-oddly-set-mollusk",
         "type": "string"
       }
