@@ -4,6 +4,14 @@ use serde_json::Value;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
+pub struct Graph {
+    pub nodes: Vec<Node>,
+    pub links: Vec<Link>,
+    pub outputs: Vec<Output>,
+}
+
+
+#[derive(Serialize, Deserialize)]
 pub struct Node {
     pub address: String,
     pub node_type: String,
