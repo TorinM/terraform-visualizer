@@ -19,6 +19,24 @@ h1 {
     text-align: center;
 }
 
+#copyButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#copyButton:hover {
+    background-color: #45a049;
+}
+
 #visualization {
     width: 90%;
     height: 60vh;
@@ -33,31 +51,49 @@ h1 {
 
 .output {
     width: 90%;
+    max-width: 100%;
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
     box-sizing: border-box;
+    overflow-y: auto;
+    flex-grow: 1;
     margin-bottom: 20px;
 }
 
 .output h2 {
     margin-top: 0;
     color: #333;
+    text-align: center;
 }
 
 .output ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 .output li {
     background-color: #f9f9f9;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 4px;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
     border: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.output li span.key {
+    font-weight: bold;
+    color: #555;
+}
+
+.output li span.value {
+    color: #888;
 }
 
 .node circle {

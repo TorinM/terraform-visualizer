@@ -1,8 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let rawData;
+
     const fetchData = () => {
         fetch('/data')
             .then(response => response.json())
             .then(data => {
+                rawData = data; // Store the fetched data
                 console.log("Fetched Data:", data);
 
                 if (!data) throw new Error("No data fetched");
@@ -91,9 +94,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const outputList = d3.select(".output").html("").append("ul");
         data.outputs.forEach(output => {
-            outputList.append("li").text(`${output.name}: ${output.value}`);
+            const listItem = outputList.append("li");
+            listItem.append("span").attr("class", "key").text(output.name);
+            listItem.append("span").attr("class", "value").text(output.value);
         });
     };
+
+    const copyToClipboard = (text) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    };
+
+    document.getElementById('copyButton').addEventListener('click', () => {
+        if (rawData) {
+            copyToClipboard(JSON.stringify(rawData, null, 2));
+            const copyButton = document.getElementById('copyButton');
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy JSON';
+            }, 2000);
+        } else {
+            alert('No data to copy');
+        }
+    });
 
     fetchData(); // Initial fetch
 });
