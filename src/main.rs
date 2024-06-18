@@ -32,7 +32,7 @@ async fn main() {
     {
         Ok(json_data) => json_data,
         Err(e) => {
-            eprintln!("Fatal error parsing Terraform data. Message: {}", e);
+            eprintln!("Fatal error parsing Terraform data. Verify input file is from `terraform show -json example.json`. Message: {}", e);
             return;
         }
     };

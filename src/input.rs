@@ -21,8 +21,8 @@ fn verify_input_file_json(data: &str) -> Result<serde_json::Value, serde_json::E
 pub fn get_file_path() -> Result<String, String> {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: {} <PATH TO terraform.json FILE>", args[0]);
-        return Err("Bad arguments".to_string());
+        let msg: String = format!("Usage: {} <PATH TO terraform.json FILE>", args[0]);
+        return Err(msg);
     }
     Ok(args[1].clone())
 }
@@ -32,8 +32,8 @@ pub fn get_file_path() -> Result<String, String> {
 /// Wraps the std::path::Path::exists function.
 pub fn verify_file_exists(file_path: &str) -> Result<(), String> {
     if !Path::new(file_path).exists() {
-        eprintln!("File '{}' not found.", file_path);
-        return Err("File not found".to_string());
+        let msg = format!("File '{}' not found.", file_path);
+        return Err(msg);
     }
     Ok(())
 }
@@ -48,13 +48,11 @@ pub fn read_input(file_path: &String) -> Result<Value, Box<dyn std::error::Error
             match verify_input_file_json(&data) {
                 Ok(json_data) => Ok(json_data),
                 Err(e) => {
-                    eprintln!("Error reading input file. Verify input file is from `terraform show -json example.json`");
                     Err(Box::new(e))
                 }
             }
         }
         Err(e) => {
-            eprintln!("Fatal error reading input file: {}", e);
             Err(Box::new(e))
         }
     }
