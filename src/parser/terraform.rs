@@ -26,14 +26,14 @@ fn get_nodes(resources: &Vec<Value>) -> Result<Vec<types::Node>, Box<dyn Error>>
 fn get_links(resources: &Vec<Value>) -> Result<Vec<types::Link>, Box<dyn Error>> {
     let mut links: Vec<types::Link> = Vec::new();
     for resource in resources {
-        let source_addr = resource.get("address").ok_or("Missing `address` field")?.to_string();
+        let source_addr = resource.get("address").ok_or("Missing `address` field")?.as_str().ok_or("`address` field is not a string")?.to_string();
 
         let depends_on = match resource.get("depends_on") {
             Some(depends_on) => depends_on.as_array().ok_or("`depends_on` field is not an array")?,
             None => { continue; }
         };
         for depend in depends_on {
-            let target_addr = depend.to_string();
+            let target_addr = depend.as_str().ok_or("value in `depends_on` field is not a string")?.to_string();
             let link: types::Link = types::Link::new(source_addr.clone(), target_addr);
             links.push(link);
         }
@@ -42,17 +42,7 @@ fn get_links(resources: &Vec<Value>) -> Result<Vec<types::Link>, Box<dyn Error>>
 }
 
 
-fn convert_graph_to_json_string(nodes: Vec<types::Node>, links: Vec<types::Link>, outputs: Vec<types::Output>) -> Result<String, serde_json::Error> {
-    let graph = types::Graph {
-        nodes,
-        links,
-        outputs,
-    };
-    serde_json::to_string(&graph)
-}
-
-
-pub fn parse_terraform(json_data: &Value) -> Result<String, Box<dyn Error>> {
+pub fn parse_terraform(json_data: &Value) -> Result<types::Graph, Box<dyn Error>> {
     let values = json_data.get("values").ok_or("Missing top level `values` field")?;
 
     let outputs = values.get("outputs").ok_or("Missing `outputs` field")?
@@ -66,10 +56,9 @@ pub fn parse_terraform(json_data: &Value) -> Result<String, Box<dyn Error>> {
     let links: Vec<types::Link> = get_links(resources)?;
     let outputs: Vec<types::Output> = get_outputs(outputs)?;
 
-    match convert_graph_to_json_string(nodes, links, outputs) {
-        Ok(json_string) => Ok(json_string),
-        Err(e) => {
-            Err(Box::new(e))
-        }
-    }
+    Ok(types::Graph {
+        nodes,
+        links,
+        outputs,
+    })
 }

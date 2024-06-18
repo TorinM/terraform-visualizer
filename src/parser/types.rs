@@ -35,7 +35,7 @@ fn parse_terraform_value(value: &Value) -> String {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Graph {
     pub nodes: Vec<Node>,
     pub links: Vec<Link>,
@@ -43,7 +43,7 @@ pub struct Graph {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Node {
     pub address: String,
     pub node_type: String,
@@ -81,7 +81,7 @@ impl Node {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Link {
     pub source_addr: String,
     pub target_addr: String,
@@ -93,7 +93,7 @@ impl Link {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Output {
     pub name: String,
     pub value: String,
