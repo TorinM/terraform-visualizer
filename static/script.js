@@ -92,6 +92,39 @@ document.addEventListener('DOMContentLoaded', () => {
             .attr("dy", ".35em")
             .text(d => d.address);
 
+        // Tooltip for displaying node data
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("background", "#f9f9f9")
+            .style("padding", "10px")
+            .style("border", "1px solid #d3d3d3")
+            .style("border-radius", "5px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+
+        // Function to pretty print JSON
+        const prettyPrintJSON = (nodeData) => {
+            let html = '<pre>';
+            const clonedData = JSON.parse(JSON.stringify(nodeData));
+            const cleanedData = JSON.stringify(stripDataFromNode(clonedData), null, 2);
+            html += cleanedData.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            html += '</pre>';
+            return html;
+        };
+
+        node.on("mouseover", (event, d) => {
+            tooltip.transition().duration(200).style("opacity", .9);
+            tooltip.html(`<strong>Node Data:</strong><br/>${prettyPrintJSON(d)}`)
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY + 10}px`);
+            d3.select(event.currentTarget).select("circle").attr("r", 16);
+        })
+        .on("mouseout", (event, d) => {
+            tooltip.transition().duration(500).style("opacity", 0);
+            d3.select(event.currentTarget).select("circle").attr("r", 8);
+        });
+
         const outputList = d3.select(".output").html("").append("ul");
         data.outputs.forEach(output => {
             const listItem = outputList.append("li");
@@ -113,25 +146,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const stripPositions = (data) => {
+    const stripDataFromNode = (nodeData) => {
         // Deep clone the data object to avoid modifying the original data
-        const clonedData = JSON.parse(JSON.stringify(data));
-        clonedData.nodes.forEach(node => {
-            delete node.x;
-            delete node.y;
-            delete node.vx;
-            delete node.vy;
-            delete node.fx;
-            delete node.fy;
-            delete node.index;
-        });
-        return clonedData;
+        delete nodeData.x;
+        delete nodeData.y;
+        delete nodeData.vx;
+        delete nodeData.vy;
+        delete nodeData.fx;
+        delete nodeData.fy;
+        delete nodeData.index;
+        return nodeData;
     };
 
     document.getElementById('copyButton').addEventListener('click', () => {
         if (rawData) {
-            const cleanedData = stripPositions(rawData);
-            copyToClipboard(JSON.stringify(cleanedData, null, 2));
+            const clonedData = JSON.parse(JSON.stringify(rawData));
+            clonedData.nodes.forEach(node => {
+                stripDataFromNode(node);
+            });
+            copyToClipboard(JSON.stringify(clonedData, null, 2));
         } else {
             alert('No data to copy');
         }
