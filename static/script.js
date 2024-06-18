@@ -109,9 +109,25 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(textarea);
     };
 
+    const stripPositions = (data) => {
+        // Deep clone the data object to avoid modifying the original data
+        const clonedData = JSON.parse(JSON.stringify(data));
+        clonedData.nodes.forEach(node => {
+            delete node.x;
+            delete node.y;
+            delete node.vx;
+            delete node.vy;
+            delete node.fx;
+            delete node.fy;
+            delete node.index;
+        });
+        return clonedData;
+    };
+
     document.getElementById('copyButton').addEventListener('click', () => {
         if (rawData) {
-            copyToClipboard(JSON.stringify(rawData, null, 2));
+            const cleanedData = stripPositions(rawData);
+            copyToClipboard(JSON.stringify(cleanedData, null, 2));
             const copyButton = document.getElementById('copyButton');
             copyButton.textContent = 'Copied!';
             setTimeout(() => {
