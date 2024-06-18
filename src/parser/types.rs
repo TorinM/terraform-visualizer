@@ -20,26 +20,26 @@ pub struct Node {
     pub values: HashMap<String, String>
 }
 impl Node {
-    pub fn new(resource: &Value) -> Node {
-        let address = resource.get("address").unwrap().to_string();
-        let node_type = resource.get("type").unwrap().to_string();
-        let name = resource.get("name").unwrap().to_string();
-        let provider = resource.get("provider").unwrap().to_string();
+    pub fn new(resource: &Value) -> Result<Node, Box<dyn std::error::Error>> {
+        let address = resource.get("address").ok_or("Missing address field")?.to_string();
+        let node_type = resource.get("type").ok_or("Missing type field")?.to_string();
+        let name = resource.get("name").ok_or("Missing name field")?.to_string();
+        let provider = resource.get("provider").ok_or("Missing provider field")?.to_string();
 
         let mut values_hm: HashMap<String, String> = HashMap::new();
-        let values_json: &Value = resource.get("provider").unwrap();
-        for (key, value) in values_json.as_object().unwrap() {
+        let values_json: &Value = resource.get("values").ok_or("Missing values field")?;
+        for (key, value) in values_json.as_object().ok_or("value field is not a valid JSON object")? {
             let value = value.to_string();
             values_hm.insert(key.clone(), value);
         }
 
-        Node {
+        Ok(Node {
             address,
             node_type,
             name,
             provider,
             values: values_hm
-        }
+        })
     }
 }
 
@@ -51,10 +51,7 @@ pub struct Link {
 }
 impl Link {
     pub fn new(source: String, target: String) -> Link {
-        Link {
-            source,
-            target
-        }
+        Link { source, target }
     }
 }
 
@@ -66,21 +63,20 @@ pub struct Output {
     pub sensitive: bool
 }
 impl Output {
-    pub fn new(output: &Value) -> Output {
-        let name = output.get("name").unwrap().to_string();
-        let sensitive = output.get("sensitive").unwrap().as_bool().unwrap();
+    pub fn new(name: String, output: &Value) -> Result<Output, Box<dyn std::error::Error>> {
+        let sensitive = output.get("sensitive").ok_or("Missing sensitive field")?.as_bool().ok_or("sensitive field is not a boolean")?;
 
         let value = if sensitive {
-            output.get("value").unwrap().to_string()
+            output.get("value").ok_or("Missing value field")?.to_string()
         }
         else {
             "<sensitive>".to_string()
         };
 
-        Output {
+        Ok(Output {
             name,
             value,
             sensitive
-        }
+        })
     }
 }
