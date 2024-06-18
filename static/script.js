@@ -100,13 +100,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const copyToClipboard = (text) => {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+    const copyToClipboard = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            const copyButton = document.getElementById('copyButton');
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy JSON';
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
     };
 
     const stripPositions = (data) => {
@@ -128,11 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rawData) {
             const cleanedData = stripPositions(rawData);
             copyToClipboard(JSON.stringify(cleanedData, null, 2));
-            const copyButton = document.getElementById('copyButton');
-            copyButton.textContent = 'Copied!';
-            setTimeout(() => {
-                copyButton.textContent = 'Copy JSON';
-            }, 2000);
         } else {
             alert('No data to copy');
         }
