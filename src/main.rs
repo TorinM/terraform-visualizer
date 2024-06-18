@@ -10,18 +10,21 @@ async fn main() {
 
     let file_path = match input::get_file_path(){
         Ok(path) => path,
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Fatal getting file information. Message: {}", e);
             return;
         }
     };
 
-    if let Err(_) = input::verify_file_exists(&file_path){
+    if let Err(e) = input::verify_file_exists(&file_path) {
+        eprintln!("Fatal error verifying input. Message: {}", e);
         return;
     }
 
     let json_data_raw = match input::read_input(&file_path){
         Ok(json_data) => json_data,
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Fatal error reading input. Message: {}", e);
             return;
         }
     };
