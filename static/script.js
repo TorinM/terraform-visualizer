@@ -27,8 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const width = 960;
         const height = 600;
 
+        d3.select(".loading").remove(); // Remove loading symbol
+
         const svg = d3.select("#visualization")
-            .html("") // Clear previous content
             .append("svg")
             .attr("width", width)
             .attr("height", height);
@@ -41,7 +42,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const simulation = d3.forceSimulation(data.nodes)
             .force("link", d3.forceLink(links).id(d => d.address).distance(100))
             .force("charge", d3.forceManyBody().strength(-200))
-            .force("center", d3.forceCenter(width / 2, height / 2));
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("transform", d => `translate(${d.x},${d.y})`);
+            })
+            .on("end", () => {
+                // Fix positions after the initial layout
+                data.nodes.forEach(node => {
+                    node.fx = node.x;
+                    node.fy = node.y;
+                });
+            });
 
         const link = svg.append("g")
             .attr("class", "links")
@@ -61,11 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         node.append("circle")
             .attr("r", 8)
-            .attr("fill", "blue")
-            .call(d3.drag()
-                .on("start", dragStarted)
-                .on("drag", dragged)
-                .on("end", dragEnded));
+            .attr("fill", "blue");
 
         node.append("title")
             .text(d => d.address);
@@ -75,40 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .attr("dy", ".35em")
             .text(d => d.address);
 
-        simulation.on("tick", () => {
-            link
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
-
-            node
-                .attr("transform", d => `translate(${d.x},${d.y})`);
-        });
-
-        simulation.force("link").links(links);
-
         const outputList = d3.select(".output").html("").append("ul");
         data.outputs.forEach(output => {
             outputList.append("li").text(`${output.name}: ${output.value}`);
         });
     };
 
-    const dragStarted = (event, d) => {
-        if (!event.active) d.fx = d.fy = null;
-        d.fx = d.x;
-        d.fy = d.y;
-    };
-
-    const dragged = (event, d) => {
-        d.fx = event.x;
-        d.fy = event.y;
-    };
-
-    const dragEnded = (event, d) => {
-        if (!event.active) d.fx = d.fy = null;
-    };
-
-    setInterval(fetchData, 5000); // Poll every 5 seconds
     fetchData(); // Initial fetch
 });
