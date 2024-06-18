@@ -70,14 +70,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Create nodes
             const node = svg.append("g")
                 .attr("class", "nodes")
-                .selectAll("circle")
+                .selectAll("g")
                 .data(data.nodes)
-                .enter().append("circle")
+                .enter().append("g")
+                .attr("class", "node");
+
+            node.append("circle")
                 .attr("r", 5)
                 .attr("fill", "blue");
 
             node.append("title")
-                .text(d => d.name);
+                .text(d => d.address);
+
+            // Add text labels to the nodes
+            node.append("text")
+                .attr("dx", 12)
+                .attr("dy", ".35em")
+                .text(d => d.address);
 
             // Update the simulation on each tick
             simulation
@@ -90,8 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         .attr("y2", d => d.target.y);
 
                     node
-                        .attr("cx", d => d.x)
-                        .attr("cy", d => d.y);
+                        .attr("transform", d => `translate(${d.x},${d.y})`);
                 });
 
             simulation.force("link").links(links);
