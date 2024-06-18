@@ -38,7 +38,7 @@ async fn main() {
 
     let routes = static_files.or(data);
 
-    // Start the server
+    println!("Watching for changes in input file. Reload webpage to see updates.");
     println!("Server started at http://127.0.0.1:3030");
     warp::serve(routes).run(([127,0,0,1], 3030)).await
 }
