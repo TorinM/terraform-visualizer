@@ -27,15 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderVisualization = (data) => {
-        const width = 960;
-        const height = 600;
+        const container = document.getElementById('visualization');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
 
         d3.select(".loading").remove(); // Remove loading symbol
 
         const svg = d3.select("#visualization")
             .append("svg")
-            .attr("width", width)
-            .attr("height", height);
+            .attr("width", "100%")
+            .attr("height", "100%");
 
         const links = data.links.map(link => ({
             source: data.nodes.find(node => node.address === link.source_addr),
@@ -43,9 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
 
         const simulation = d3.forceSimulation(data.nodes)
-            .force("link", d3.forceLink(links).id(d => d.address).distance(100))
-            .force("charge", d3.forceManyBody().strength(-200))
+            .force("link", d3.forceLink(links).id(d => d.address).distance(50))
+            .force("charge", d3.forceManyBody().strength(-50))
             .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collide", d3.forceCollide().radius(30).strength(0.7))
+            .force("boundary", boundaryForce(data, 0, 0, width, height))
             .on("tick", () => {
                 link
                     .attr("x1", d => d.source.x)
@@ -55,13 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 node
                     .attr("transform", d => `translate(${d.x},${d.y})`);
-            })
-            .on("end", () => {
-                // Fix positions after the initial layout
-                data.nodes.forEach(node => {
-                    node.fx = node.x;
-                    node.fy = node.y;
-                });
             });
 
         const link = svg.append("g")
@@ -86,11 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         node.append("title")
             .text(d => d.address);
-
-        // node.append("text")
-        //     .attr("dx", 12)
-        //     .attr("dy", ".35em")
-        //     .text(d => d.address);
 
         // Tooltip for displaying node data
         const tooltip = d3.select("body").append("div")
@@ -131,6 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
             listItem.append("span").attr("class", "key").text(output.name);
             listItem.append("span").attr("class", "value").text(output.value);
         });
+    };
+
+    const boundaryForce = (data, x0, y0, x1, y1) => {
+        return (alpha) => {
+            for (let i = 0, n = data.nodes.length; i < n; ++i) {
+                const node = data.nodes[i];
+                node.x = Math.max(x0, Math.min(x1, node.x));
+                node.y = Math.max(y0, Math.min(y1, node.y));
+            }
+        };
     };
 
     const copyToClipboard = async (text) => {
