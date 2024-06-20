@@ -57,9 +57,10 @@ pub struct Node {
     pub provider: String,
     pub mode: String,
     pub values: HashMap<String, String>,
+    pub is_root: bool,
 }
 impl Node {
-    pub fn new(resource: &Value) -> Result<Node, Box<dyn std::error::Error>> {
+    pub fn new(resource: &Value, is_root:bool) -> Result<Node, Box<dyn std::error::Error>> {
         let address = resource.get("address").ok_or("Missing `address` field")?
             .as_str().ok_or("`address` field is not a string")?.to_string();
         let node_type = resource.get("type").ok_or("Missing `type` field")?
@@ -86,6 +87,7 @@ impl Node {
             provider,
             mode,
             values: values_hm,
+            is_root,
         })
     }
 }
