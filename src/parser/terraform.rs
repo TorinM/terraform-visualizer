@@ -45,16 +45,23 @@ fn get_links(resources: &Vec<Value>) -> Result<Vec<types::Link>, Box<dyn Error>>
 pub fn parse_terraform(json_data: &Value) -> Result<types::Graph, Box<dyn Error>> {
     let values = json_data.get("values").ok_or("Missing top level `values` field")?;
 
-    let outputs = values.get("outputs").ok_or("Missing `outputs` field")?
-                .as_object().ok_or("`outputs` field is not a valid JSON object")?;
+    let resources = values.get("root_module")
+                .ok_or("Missing `root_module` field")?
+                .get("resources")
+                .ok_or("Missing `resources` field")?
+                .as_array()
+                .ok_or("`resources` field is not an array")?;
 
-    let resources = values.get("root_module").ok_or("Missing `root_module` field")?
-                .get("resources").ok_or("Missing `resources` field")?
-                .as_array().ok_or("`resources` field is not an array")?;
+    let outputs = match values.get("outputs") {
+        Some(outputs) => {
+            let sanitized_outputs = outputs.as_object().ok_or("`outputs` field is not a valid JSON object")?;
+            get_outputs(sanitized_outputs)?
+        },
+        None => Vec::<types::Output>::new()
+    };
 
     let nodes: Vec<types::Node> = get_nodes(resources)?;
     let links: Vec<types::Link> = get_links(resources)?;
-    let outputs: Vec<types::Output> = get_outputs(outputs)?;
 
     Ok(types::Graph {
         nodes,
