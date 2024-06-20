@@ -13,10 +13,10 @@ fn get_outputs(outputs: &Map<String, Value>) -> Result<Vec<types::Output>, Box<d
 }
 
 
-fn get_nodes(resources: &Vec<Value>) -> Result<Vec<types::Node>, Box<dyn Error>> {
+fn get_nodes(resources: &Vec<Value>, is_root:bool) -> Result<Vec<types::Node>, Box<dyn Error>> {
     let mut nodes: Vec<types::Node> = Vec::new();
     for resource in resources {
-        let node = types::Node::new(resource)?;
+        let node = types::Node::new(resource, is_root)?;
         nodes.push(node);
     }
     Ok(nodes)
@@ -53,12 +53,9 @@ pub fn parse_terraform(json_data: &Value) -> Result<types::Graph, Box<dyn Error>
                 .ok_or("`resources` field is not an array")?
                 .clone();
 
-    match values.get("child_modules") {
-        Some(child_resources) => {
-            let children = child_resources.as_array().ok_or("`child_modules` field is not an array")?;
-            resources.append(&mut children.clone())
-        },
-        None => {  }
+    let child_resources = match values.get("child_modules") {
+        Some(child_resources) => child_resources.get("resources").ok_or("Missing `resources` field")?.as_array().ok_or("`resources` field is not an array")?.clone(),
+        None => Vec::<Value>::new().clone()
     };
 
     let outputs = match values.get("outputs") {
@@ -69,7 +66,11 @@ pub fn parse_terraform(json_data: &Value) -> Result<types::Graph, Box<dyn Error>
         None => Vec::<types::Output>::new()
     };
 
-    let nodes: Vec<types::Node> = get_nodes(&resources)?;
+    let mut nodes: Vec<types::Node> = get_nodes(&resources, true)?;
+    let child_nodes: Vec<types::Node> = get_nodes(&child_resources, false)?;
+    nodes.extend(child_nodes);
+    resources.extend(child_resources);
+
     let links: Vec<types::Link> = get_links(&resources)?;
 
     Ok(types::Graph {
