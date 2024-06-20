@@ -118,3 +118,40 @@ svg {
     width: 100%;
     height: 100%;
 }
+
+.node-data {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.node-data h2 {
+    margin-top: 0;
+    color: #333;
+}
+.values {
+    display: none;
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid #ccc;
+}
+.toggle-button {
+    background: none;
+    border: none;
+    color: #007BFF;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+#visualization {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+}
+#nodeInfoContainer {
+    margin-top: 20px;
+}
