@@ -82,15 +82,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         node.append("circle")
             .attr("r", 8)
-            .attr("fill", "blue");
+            .attr("fill", d => d.mode === "data" ? "green" : d.mode === "managed" ? "blue" : "gray");
 
         node.append("title")
             .text(d => d.address);
 
-        node.append("text")
-            .attr("dx", 12)
-            .attr("dy", ".35em")
-            .text(d => d.address);
+        // node.append("text")
+        //     .attr("dx", 12)
+        //     .attr("dy", ".35em")
+        //     .text(d => d.address);
 
         // Tooltip for displaying node data
         const tooltip = d3.select("body").append("div")
