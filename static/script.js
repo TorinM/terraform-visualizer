@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let rawData;
+    let simulation;
+    let svg;
 
     const fetchData = () => {
         fetch('/data')
@@ -34,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         d3.select(".loading").remove(); // Remove loading symbol
 
-        const svg = d3.select("#visualization")
+        svg = d3.select("#visualization")
             .append("svg")
             .attr("width", "100%")
             .attr("height", "100%");
@@ -44,12 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
             target: data.nodes.find(node => node.address === link.target_addr)
         }));
 
-        const simulation = d3.forceSimulation(data.nodes)
+        simulation = d3.forceSimulation(data.nodes)
             .force("link", d3.forceLink(links).id(d => d.address).distance(50))
             .force("charge", d3.forceManyBody().strength(-50))
             .force("center", d3.forceCenter(width / 2, height / 2))
             .force("collide", d3.forceCollide().radius(30).strength(0.7))
-            .force("boundary", boundaryForce(data, buffer, buffer, width - buffer, height - buffer))
+            .force("boundary", boundaryForce(buffer, buffer, width - buffer, height - buffer))
             .on("tick", () => {
                 link
                     .attr("x1", d => d.source.x)
@@ -125,15 +127,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const boundaryForce = (data, x0, y0, x1, y1) => {
+    const boundaryForce = (x0, y0, x1, y1) => {
         return (alpha) => {
-            for (let i = 0, n = data.nodes.length; i < n; ++i) {
-                const node = data.nodes[i];
+            for (let i = 0, n = rawData.nodes.length; i < n; ++i) {
+                const node = rawData.nodes[i];
                 node.x = Math.max(x0, Math.min(x1, node.x));
                 node.y = Math.max(y0, Math.min(y1, node.y));
             }
         };
     };
+
+    const handleResize = () => {
+        const container = document.getElementById('visualization');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        const buffer = 20;
+
+        svg.attr("width", width).attr("height", height);
+        
+        simulation.force("center", d3.forceCenter(width / 2, height / 2));
+        simulation.force("boundary", boundaryForce(buffer, buffer, width - buffer, height - buffer));
+        simulation.alpha(1).restart(); // Restart the simulation to apply the new forces
+    };
+
+    window.addEventListener('resize', handleResize);
 
     const copyToClipboard = async (text) => {
         try {
