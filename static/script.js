@@ -111,19 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     node.append("title").text((d) => d.address);
 
-    // Tooltip for displaying node data
-    const tooltip = d3
-      .select("body")
-      .append("div")
-      .attr("class", "tooltip")
-      .style("position", "absolute")
-      .style("background", "#f9f9f9")
-      .style("padding", "10px")
-      .style("border", "1px solid #d3d3d3")
-      .style("border-radius", "5px")
-      .style("pointer-events", "none")
-      .style("opacity", 0);
-
     // Function to pretty print JSON
     const prettyPrintNode = (node) => {
       const valuesHtml = Object.entries(node.values)
@@ -152,32 +139,57 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
                 </tr>
             </table>
-            <th><button class="toggle-button" onclick="toggleValues(this)">Show Values</button></th>
+            <th><button class="toggle-button">Show Values</button></th>
             <div class="values">${valuesHtml}</div>
             </div>
         `;
       return html;
     };
 
-    node
-      .on("mouseover", (event, d) => {
-        tooltip.transition().duration(200).style("opacity", 0.9);
-        tooltip
-          .html(prettyPrintNode(d))
-          .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY + 10}px`);
-        d3.select(event.currentTarget).select("circle").attr("r", 16);
-      })
-      .on("mouseout", (event, d) => {
-        tooltip.transition().duration(500).style("opacity", 0);
-        d3.select(event.currentTarget).select("circle").attr("r", 8);
-      });
+    // Tooltip for displaying node data
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("position", "absolute")
+      .style("background", "#f9f9f9")
+      .style("padding", "10px")
+      .style("border", "1px solid #d3d3d3")
+      .style("border-radius", "5px")
+      .style("pointer-events", "none")
+      .style("opacity", 0);
 
-    const outputList = d3.select(".output").html("").append("ul");
-    data.outputs.forEach((output) => {
-      const listItem = outputList.append("li");
-      listItem.append("span").attr("class", "key").text(output.name);
-      listItem.append("span").attr("class", "value").text(output.value);
+    node.on("mouseover", (event, d) => {
+      tooltipVisible = true;
+      tooltip.transition().duration(200).style("opacity", .9);
+      tooltip.html(prettyPrintNode(d));
+
+      // Calculate tooltip position
+      const tooltipWidth = tooltip.node().offsetWidth;
+      const tooltipHeight = tooltip.node().offsetHeight;
+      let left = event.pageX + 10;
+      let top = event.pageY + 10;
+
+      // Ensure the tooltip does not go off the right edge of the window
+      if (left + tooltipWidth > window.innerWidth) {
+          left = window.innerWidth - tooltipWidth - 10;
+      }
+
+      // Ensure the tooltip does not go off the bottom edge of the window
+      if (top + tooltipHeight > window.innerHeight) {
+          top = window.innerHeight - tooltipHeight - 10;
+      }
+
+      tooltip.style("left", `${left}px`).style("top", `${top}px`);
+      d3.select(event.currentTarget).select("circle").attr("r", 16);
+  }).on("mouseout", (event, d) => {
+      tooltipVisible = false;
+      setTimeout(() => {
+          if (!tooltipVisible) {
+              tooltip.transition().duration(500).style("opacity", 0);
+          }
+      }, 300); // Delay to account for the user moving the mouse to the tooltip
+      d3.select(event.currentTarget).select("circle").attr("r", 8);
     });
   };
 
