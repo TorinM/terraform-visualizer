@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('visualization');
         const width = container.clientWidth;
         const height = container.clientHeight;
+        const buffer = 20; // Buffer space to keep nodes fully visible within the boundary
 
         d3.select(".loading").remove(); // Remove loading symbol
 
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .force("charge", d3.forceManyBody().strength(-50))
             .force("center", d3.forceCenter(width / 2, height / 2))
             .force("collide", d3.forceCollide().radius(30).strength(0.7))
-            .force("boundary", boundaryForce(data, 0, 0, width, height))
+            .force("boundary", boundaryForce(data, buffer, buffer, width - buffer, height - buffer))
             .on("tick", () => {
                 link
                     .attr("x1", d => d.source.x)
