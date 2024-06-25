@@ -117,33 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     node.append("title").text((d) => d.address);
 
-    // Function to pretty print JSON
-    const prettyPrintNode = (node) => {
-      let html = `
-        <div class="node-data">
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
-                <td style="padding: 8px; border: 1px solid #ddd;">${node.address}</td>
-            </tr>
-            <tr>
-                <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
-                <td style="padding: 8px; border: 1px solid #ddd;">${node.node_type}</td>
-            </tr>
-            <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
-                <td style="padding: 8px; border: 1px solid #ddd;">${node.name}</td>
-            </tr>
-            <tr>
-                <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
-                <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
-            </tr>
-        </table>
-        </div>
-      `;
-      return html;
-    };
-
     // Tooltip for displaying node data
     const tooltip = d3
       .select("body")
@@ -191,33 +164,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 300); // Delay to account for the user moving the mouse to the tooltip
         d3.select(event.currentTarget).select("circle").attr("r", 8);
       });
+  };
 
-    const legend = svg
-      .append("g")
-      .attr("class", "legend")
-      .attr("transform", `translate(${width - 150}, 20)`); // Adjust position as needed
-
-    legend
-      .selectAll("rect")
-      .data(legendData)
-      .enter()
-      .append("rect")
-      .attr("x", 0)
-      .attr("y", (d, i) => i * 20)
-      .attr("width", 18)
-      .attr("height", 18)
-      .attr("fill", (d) => d.color);
-
-    legend
-      .selectAll("text")
-      .data(legendData)
-      .enter()
-      .append("text")
-      .attr("x", 24)
-      .attr("y", (d, i) => i * 20 + 9)
-      .attr("dy", "0.35em")
-      .text((d) => d.label);
-
+  // Function to pretty print JSON
+  const prettyPrintNode = (node) => {
+    let html = `
+      <div class="node-data">
+      <table style="width: 100%; border-collapse: collapse;">
+          <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">${node.address}</td>
+          </tr>
+          <tr>
+              <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">${node.node_type}</td>
+          </tr>
+          <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">${node.name}</td>
+          </tr>
+          <tr>
+              <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
+          </tr>
+      </table>
+      </div>
+    `;
+    return html;
   };
 
   const boundaryForce = (x0, y0, x1, y1) => {
