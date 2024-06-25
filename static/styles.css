@@ -155,3 +155,31 @@ svg {
 #nodeInfoContainer {
     margin-top: 20px;
 }
+.legend {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Updated for a floating effect */
+    z-index: 10; /* Ensure it appears above other elements */
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-color {
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
+    border: 1px solid #000;
+}
