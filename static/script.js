@@ -56,8 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
       target: data.nodes.find((node) => node.address === link.target_addr),
     }));
 
-    const legendWidth = document.getElementById("legend").offsetWidth;
-    const legendHeight = document.getElementById("legend").offsetHeight;
+    const legendWidth = document.getElementById("legend").offsetWidth + 20;
+    const legendHeight = document.getElementById("legend").offsetHeight + 20;
 
     simulation = d3
       .forceSimulation(data.nodes)
