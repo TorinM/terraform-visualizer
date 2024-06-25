@@ -3,6 +3,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let simulation;
   let svg;
 
+  const legendData = [
+    { mode: "data", color: "green", label: "Data Module" },
+    { mode: "managed", color: "blue", label: "Managed Module" },
+    { mode: "other", color: "gray", label: "Other" },
+  ];
+
   const fetchData = () => {
     fetch("/data")
       .then((response) => response.json())
@@ -113,36 +119,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to pretty print JSON
     const prettyPrintNode = (node) => {
-      const valuesHtml = Object.entries(node.values)
-        .map(([key, value]) => {
-          return `<div><strong>${key}:</strong> ${value}</div>`;
-        })
-        .join("");
-
       let html = `
-            <div class="node-data">
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="background-color: #f2f2f2;">
-                    <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${node.address}</td>
-                </tr>
-                <tr>
-                    <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${node.node_type}</td>
-                </tr>
-                <tr style="background-color: #f2f2f2;">
-                    <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${node.name}</td>
-                </tr>
-                <tr>
-                    <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
-                </tr>
-            </table>
-            <th><button class="toggle-button">Show Values</button></th>
-            <div class="values">${valuesHtml}</div>
-            </div>
-        `;
+        <div class="node-data">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
+                <td style="padding: 8px; border: 1px solid #ddd;">${node.address}</td>
+            </tr>
+            <tr>
+                <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
+                <td style="padding: 8px; border: 1px solid #ddd;">${node.node_type}</td>
+            </tr>
+            <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
+                <td style="padding: 8px; border: 1px solid #ddd;">${node.name}</td>
+            </tr>
+            <tr>
+                <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
+                <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
+            </tr>
+        </table>
+        </div>
+      `;
       return html;
     };
 
@@ -159,38 +157,67 @@ document.addEventListener("DOMContentLoaded", () => {
       .style("pointer-events", "none")
       .style("opacity", 0);
 
-    node.on("mouseover", (event, d) => {
-      tooltipVisible = true;
-      tooltip.transition().duration(200).style("opacity", .9);
-      tooltip.html(prettyPrintNode(d));
+    node
+      .on("mouseover", (event, d) => {
+        tooltipVisible = true;
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip.html(prettyPrintNode(d));
 
-      // Calculate tooltip position
-      const tooltipWidth = tooltip.node().offsetWidth;
-      const tooltipHeight = tooltip.node().offsetHeight;
-      let left = event.pageX + 10;
-      let top = event.pageY + 10;
+        // Calculate tooltip position
+        const tooltipWidth = tooltip.node().offsetWidth;
+        const tooltipHeight = tooltip.node().offsetHeight;
+        let left = event.pageX + 10;
+        let top = event.pageY + 10;
 
-      // Ensure the tooltip does not go off the right edge of the window
-      if (left + tooltipWidth > window.innerWidth) {
+        // Ensure the tooltip does not go off the right edge of the window
+        if (left + tooltipWidth > window.innerWidth) {
           left = window.innerWidth - tooltipWidth - 10;
-      }
+        }
 
-      // Ensure the tooltip does not go off the bottom edge of the window
-      if (top + tooltipHeight > window.innerHeight) {
+        // Ensure the tooltip does not go off the bottom edge of the window
+        if (top + tooltipHeight > window.innerHeight) {
           top = window.innerHeight - tooltipHeight - 10;
-      }
+        }
 
-      tooltip.style("left", `${left}px`).style("top", `${top}px`);
-      d3.select(event.currentTarget).select("circle").attr("r", 16);
-  }).on("mouseout", (event, d) => {
-      tooltipVisible = false;
-      setTimeout(() => {
+        tooltip.style("left", `${left}px`).style("top", `${top}px`);
+        d3.select(event.currentTarget).select("circle").attr("r", 16);
+      })
+      .on("mouseout", (event, d) => {
+        tooltipVisible = false;
+        setTimeout(() => {
           if (!tooltipVisible) {
-              tooltip.transition().duration(500).style("opacity", 0);
+            tooltip.transition().duration(500).style("opacity", 0);
           }
-      }, 300); // Delay to account for the user moving the mouse to the tooltip
-      d3.select(event.currentTarget).select("circle").attr("r", 8);
-    });
+        }, 300); // Delay to account for the user moving the mouse to the tooltip
+        d3.select(event.currentTarget).select("circle").attr("r", 8);
+      });
+
+    const legend = svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${width - 150}, 20)`); // Adjust position as needed
+
+    legend
+      .selectAll("rect")
+      .data(legendData)
+      .enter()
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", (d, i) => i * 20)
+      .attr("width", 18)
+      .attr("height", 18)
+      .attr("fill", (d) => d.color);
+
+    legend
+      .selectAll("text")
+      .data(legendData)
+      .enter()
+      .append("text")
+      .attr("x", 24)
+      .attr("y", (d, i) => i * 20 + 9)
+      .attr("dy", "0.35em")
+      .text((d) => d.label);
+
   };
 
   const boundaryForce = (x0, y0, x1, y1) => {
