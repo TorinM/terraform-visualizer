@@ -127,16 +127,19 @@ svg {
     padding: 20px;
     margin-bottom: 20px;
 }
+
 .node-data h2 {
     margin-top: 0;
     color: #333;
 }
+
 .values {
     display: none;
     margin-top: 10px;
     padding-left: 20px;
     border-left: 2px solid #ccc;
 }
+
 .toggle-button {
     background: none;
     border: none;
@@ -145,17 +148,21 @@ svg {
     text-decoration: underline;
     padding: 0;
 }
+
 #visualization {
     width: 100%;
     height: 600px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #fff;
+    position: relative;
 }
+
 #nodeInfoContainer {
     margin-top: 20px;
 }
-.legend {
+
+#legend {
     position: absolute;
     top: 20px;
     right: 20px;
