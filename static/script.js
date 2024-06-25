@@ -3,12 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let simulation;
   let svg;
 
-  const legendData = [
-    { mode: "data", color: "green", label: "Data Module" },
-    { mode: "managed", color: "blue", label: "Managed Module" },
-    { mode: "other", color: "gray", label: "Other" },
-  ];
-
   const fetchData = () => {
     fetch("/data")
       .then((response) => response.json())
@@ -62,6 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
       target: data.nodes.find((node) => node.address === link.target_addr),
     }));
 
+    const legendWidth = document.getElementById("legend").offsetWidth;
+    const legendHeight = document.getElementById("legend").offsetHeight;
+
     simulation = d3
       .forceSimulation(data.nodes)
       .force(
@@ -76,7 +73,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .force("collide", d3.forceCollide().radius(30).strength(0.7))
       .force(
         "boundary",
-        boundaryForce(buffer, buffer, width - buffer, height - buffer)
+        boundaryForce(
+          buffer,
+          buffer,
+          width - buffer,
+          height - buffer,
+          legendWidth,
+          legendHeight
+        )
       )
       .on("tick", () => {
         link
@@ -166,39 +170,17 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   };
 
-  // Function to pretty print JSON
-  const prettyPrintNode = (node) => {
-    let html = `
-      <div class="node-data">
-      <table style="width: 100%; border-collapse: collapse;">
-          <tr style="background-color: #f2f2f2;">
-              <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
-              <td style="padding: 8px; border: 1px solid #ddd;">${node.address}</td>
-          </tr>
-          <tr>
-              <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
-              <td style="padding: 8px; border: 1px solid #ddd;">${node.node_type}</td>
-          </tr>
-          <tr style="background-color: #f2f2f2;">
-              <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
-              <td style="padding: 8px; border: 1px solid #ddd;">${node.name}</td>
-          </tr>
-          <tr>
-              <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
-              <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
-          </tr>
-      </table>
-      </div>
-    `;
-    return html;
-  };
-
-  const boundaryForce = (x0, y0, x1, y1) => {
+  const boundaryForce = (x0, y0, x1, y1, legendWidth, legendHeight) => {
     return (alpha) => {
       for (let i = 0, n = rawData.nodes.length; i < n; ++i) {
         const node = rawData.nodes[i];
-        node.x = Math.max(x0, Math.min(x1, node.x));
-        node.y = Math.max(y0, Math.min(y1, node.y));
+        if (node.x < x0 + legendWidth && node.y < y0 + legendHeight) {
+          node.x = x0 + legendWidth;
+          node.y = y0 + legendHeight;
+        } else {
+          node.x = Math.max(x0, Math.min(x1, node.x));
+          node.y = Math.max(y0, Math.min(y1, node.y));
+        }
       }
     };
   };
@@ -211,10 +193,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     svg.attr("width", width).attr("height", height);
 
+    const legendWidth = document.getElementById("legend").offsetWidth;
+    const legendHeight = document.getElementById("legend").offsetHeight;
+
     simulation.force("center", d3.forceCenter(width / 2, height / 2));
     simulation.force(
       "boundary",
-      boundaryForce(buffer, buffer, width - buffer, height - buffer)
+      boundaryForce(
+        buffer,
+        buffer,
+        width - buffer,
+        height - buffer,
+        legendWidth,
+        legendHeight
+      )
     );
     simulation.alpha(1).restart(); // Restart the simulation to apply the new forces
   };
@@ -244,6 +236,41 @@ document.addEventListener("DOMContentLoaded", () => {
     delete nodeData.fy;
     delete nodeData.index;
     return nodeData;
+  };
+
+  // Function to pretty print JSON
+  const prettyPrintNode = (node) => {
+    const valuesHtml = Object.entries(node.values)
+      .map(([key, value]) => {
+        return `<div><strong>${key}:</strong> ${value}</div>`;
+      })
+      .join("");
+
+    let html = `
+          <div class="node-data">
+          <table style="width: 100%; border-collapse: collapse;">
+              <tr style="background-color: #f2f2f2;">
+                  <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${node.address}</td>
+              </tr>
+              <tr>
+                  <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${node.node_type}</td>
+              </tr>
+              <tr style="background-color: #f2f2f2;">
+                  <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${node.name}</td>
+              </tr>
+              <tr>
+                  <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
+              </tr>
+          </table>
+          <th><button class="toggle-button">Show Values</button></th>
+          <div class="values">${valuesHtml}</div>
+          </div>
+      `;
+    return html;
   };
 
   document.getElementById("copyButton").addEventListener("click", () => {
