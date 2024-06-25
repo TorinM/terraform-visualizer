@@ -35,24 +35,32 @@ fn parse_terraform_value(value: &Value) -> String {
 }
 
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Graph {
     pub nodes: Vec<Node>,
     pub links: Vec<Link>,
     pub outputs: Vec<Output>,
 }
+impl Graph {
+    #[allow(dead_code)]
+    pub fn to_json_string(&self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
+}
 
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
     pub address: String,
     pub node_type: String,
     pub name: String,
     pub provider: String,
+    pub mode: String,
     pub values: HashMap<String, String>,
+    pub is_root: bool,
 }
 impl Node {
-    pub fn new(resource: &Value) -> Result<Node, Box<dyn std::error::Error>> {
+    pub fn new(resource: &Value, is_root:bool) -> Result<Node, Box<dyn std::error::Error>> {
         let address = resource.get("address").ok_or("Missing `address` field")?
             .as_str().ok_or("`address` field is not a string")?.to_string();
         let node_type = resource.get("type").ok_or("Missing `type` field")?
@@ -61,6 +69,8 @@ impl Node {
             .as_str().ok_or("`name` field is not a string")?.to_string();
         let provider = resource.get("provider_name").ok_or("Missing `provider_name` field")?
             .as_str().ok_or("`provider_name` field is not a string")?.to_string();
+        let mode = resource.get("mode").ok_or("Missing `mode` field")?
+            .as_str().ok_or("`mode` field is not a string")?.to_string();
 
         let mut values_hm: HashMap<String, String> = HashMap::new();
         let values_json: &Value = resource.get("values").ok_or("Missing `values` field")?;
@@ -75,13 +85,15 @@ impl Node {
             node_type,
             name,
             provider,
+            mode,
             values: values_hm,
+            is_root,
         })
     }
 }
 
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Link {
     pub source_addr: String,
     pub target_addr: String,
@@ -93,7 +105,7 @@ impl Link {
 }
 
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Output {
     pub name: String,
     pub value: String,
