@@ -19,3 +19,6 @@ Cargo.lock
 
 # Test Files
 *.json
+
+# MacOS
+.DS_Store
