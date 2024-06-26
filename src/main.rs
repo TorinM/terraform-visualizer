@@ -1,5 +1,6 @@
 use warp::Filter;
 use std::sync::Arc;
+use open;
 
 mod input;
 mod parser;
@@ -39,6 +40,10 @@ async fn main() {
     let routes = static_files.or(data);
 
     println!("Watching for changes in input file. Reload webpage to see updates.");
-    println!("Server started at http://127.0.0.1:3030");
+    match open::that("http://127.0.0.1:3030") {
+        Ok(_) => println!("Server started at http://127.0.0.1:3030"),
+        Err(e) => eprintln!("Failed to open browser. Message: {}", e),
+    };
+
     warp::serve(routes).run(([127,0,0,1], 3030)).await
 }

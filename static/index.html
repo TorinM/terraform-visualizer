@@ -29,7 +29,38 @@
         </div>
     </div>
     <h2>Outputs</h2>
-    <div class="output"></div>
+    <div class="output-container"></div>
+    <template id="output-template">
+        <div class="output-box">
+            <div class="output-name"></div>
+            <div class="output-value"></div>
+            <div class="output-sensitive"></div>
+        </div>
+    </template>
+
+    <template id="node-template">
+        <div class="node-data">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
+                    <td class="node-address" style="padding: 8px; border: 1px solid #ddd;"></td>
+                </tr>
+                <tr>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
+                    <td class="node-type" style="padding: 8px; border: 1px solid #ddd;"></td>
+                </tr>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
+                    <td class="node-name" style="padding: 8px; border: 1px solid #ddd;"></td>
+                </tr>
+                <tr>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
+                    <td class="node-provider" style="padding: 8px; border: 1px solid #ddd;"></td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
     <script src="script.js"></script>
 </body>
 </html>

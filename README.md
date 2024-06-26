@@ -22,6 +22,9 @@ This will launch a web server on `http://127.0.0.1:3030` with the visual map.
 
 - `resource`
   - `depends_on`
+- `data`
+- `module`
+- `variable`
 - `output`
 
 ## Showcase
@@ -106,15 +109,18 @@ This is an example of how the tool translates the JSON output of `terraform show
   }
 }
 ```
+
 Becomes
 
 ![Current GUI Showcase](./docs/Example.png "GUI")
 
 ## Dependencies
 
-- [serde_json](https://crates.io/crates/serde_json) - JSON parsing
-- [tokio](https://crates.io/crates/tokio) - Async runtime
-- [warp](https://crates.io/crates/warp) - Web server
+- [serde_json](https://crates.io/crates/serde_json) - JSON Parsing
+- [tokio](https://crates.io/crates/tokio) - Async Runtime
+- [warp](https://crates.io/crates/warp) - Web Server
+- [open](https://crates.io/crates/open) - Open Browser Automatically
+- [D3.js](https://d3js.org/) - Graph Rendering
 
 ## Contributing
 
