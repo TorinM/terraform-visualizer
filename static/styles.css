@@ -10,7 +10,8 @@ body {
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 h1 {
@@ -49,51 +50,29 @@ h1 {
     position: relative;
 }
 
-.output {
+.output-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     width: 90%;
-    max-width: 100%;
+    margin: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.output-box {
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    flex-grow: 1;
-    margin-bottom: 20px;
+    margin: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 300px; /* Fixed width for each box */
 }
 
-.output h2 {
-    margin-top: 0;
-    color: #333;
-    text-align: center;
-}
-
-.output ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.output li {
-    background-color: #f9f9f9;
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.output li span.key {
-    font-weight: bold;
-    color: #555;
-}
-
-.output li span.value {
-    color: #888;
+.output-name, .output-value, .output-sensitive {
+    margin-bottom: 10px;
+    font-size: 16px;
 }
 
 .node circle {

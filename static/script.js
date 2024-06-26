@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         renderVisualization(data);
+        renderOutputs(data.outputs);
       })
       .catch((error) => {
         console.error("Error fetching or processing data:", error);
@@ -227,7 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const stripDataFromNode = (nodeData) => {
-    // Deep clone the data object to avoid modifying the original data
     delete nodeData.x;
     delete nodeData.y;
     delete nodeData.vx;
@@ -238,39 +238,41 @@ document.addEventListener("DOMContentLoaded", () => {
     return nodeData;
   };
 
-  // Function to pretty print JSON
   const prettyPrintNode = (node) => {
-    const valuesHtml = Object.entries(node.values)
-      .map(([key, value]) => {
-        return `<div><strong>${key}:</strong> ${value}</div>`;
-      })
-      .join("");
+    const nodeTemplate = document.getElementById("node-template").content.cloneNode(true);
 
-    let html = `
-          <div class="node-data">
-          <table style="width: 100%; border-collapse: collapse;">
-              <tr style="background-color: #f2f2f2;">
-                  <th style="padding: 8px; border: 1px solid #ddd;">Resource Name</th>
-                  <td style="padding: 8px; border: 1px solid #ddd;">${node.address}</td>
-              </tr>
-              <tr>
-                  <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
-                  <td style="padding: 8px; border: 1px solid #ddd;">${node.node_type}</td>
-              </tr>
-              <tr style="background-color: #f2f2f2;">
-                  <th style="padding: 8px; border: 1px solid #ddd;">Terraform Name</th>
-                  <td style="padding: 8px; border: 1px solid #ddd;">${node.name}</td>
-              </tr>
-              <tr>
-                  <th style="padding: 8px; border: 1px solid #ddd;">Provider</th>
-                  <td style="padding: 8px; border: 1px solid #ddd;">${node.provider}</td>
-              </tr>
-          </table>
-          <th><button class="toggle-button">Show Values</button></th>
-          <div class="values">${valuesHtml}</div>
-          </div>
-      `;
-    return html;
+    nodeTemplate.querySelector(".node-address").textContent = node.address;
+    nodeTemplate.querySelector(".node-type").textContent = node.node_type;
+    nodeTemplate.querySelector(".node-name").textContent = node.name;
+    nodeTemplate.querySelector(".node-provider").textContent = node.provider;
+
+    return nodeTemplate.querySelector(".node-data").outerHTML;
+  };
+
+  const renderOutputs = (outputs) => {
+    // Get the container where outputs will be displayed.
+    const outputContainer = document.querySelector(".output-container");
+    
+    // Get the template's content which is predefined in the HTML.
+    const template = document.getElementById("output-template").content;
+    
+    // Clear the output container to ensure it doesn't contain previous entries.
+    // outputContainer.innerHTML = "";
+    
+    // Loop through each output data item provided to the function.
+    outputs.forEach((output) => {
+        // Clone the template node. 'true' means it will clone the node and its content.
+        const outputClone = document.importNode(template, true);
+        
+        // Populate the cloned template with actual output data.
+        // These selectors match the classes specified within the <template> in HTML.
+        outputClone.querySelector(".output-name").textContent = `Name: ${output.name}`;
+        outputClone.querySelector(".output-value").textContent = `Value: ${output.value}`;
+        outputClone.querySelector(".output-sensitive").textContent = `Sensitive: ${output.sensitive ? 'Yes' : 'No'}`;
+        
+        // Append the populated clone to the output container in the DOM.
+        outputContainer.appendChild(outputClone);
+    });
   };
 
   document.getElementById("copyButton").addEventListener("click", () => {

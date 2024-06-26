@@ -22,6 +22,9 @@ This will launch a web server on `http://127.0.0.1:3030` with the visual map.
 
 - `resource`
   - `depends_on`
+- `data`
+- `module`
+- `variable`
 - `output`
 
 ## Showcase
